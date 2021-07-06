@@ -121,7 +121,6 @@ def fan():
         RPi.GPIO.output(4, False)
 
 
-# curl 'https://api.seniverse.com/v3/weather/now.json?key=S_l42B0IBlvL9ECKc&location=suzhou&language=zh-Hans&unit=c' > /opt/projects/TFOLED/weather.json
 def get_weather():
     if not os.path.exists('./weather.json'):
         os.system('./weather.sh')
@@ -147,15 +146,17 @@ def call_net():
     rx_cmd2 = "ifconfig wlan0 | grep 'RX packets' | awk '{print $5}'"
     rx2 = subprocess.check_output(rx_cmd2, shell=True)
     download = check_unit(parse(rx2, rx1), sleep_time)
-    return 'U:' + up + ' ' +'D:' + download
+    return 'U:' + up + ' ' + 'D:' + download
 
 
 def parse(speed2, speed1):
     return int(str(speed2.decode('utf-8').strip()).strip('b')) - int(str(speed1.decode('utf-8').strip()).strip('b'))
 
+
 def check_unit(difference, sleep_time):
-    result = difference/sleep_time/1024
-    return '{:.1f}'.format(int(result/1024)) + 'M/S' if result > 1024 else '{:.1f}'.format(int(result)) + 'K/S'
+    result = difference / sleep_time / 1024
+    return '{:.1f}'.format(int(result / 1024)) + ' m/s' if result > 1024 else '{:.1f}'.format(int(result)) + ' k/s'
+
 
 def page_one():
     cmd = "hostname -I | cut -d\' \' -f1"
@@ -165,9 +166,9 @@ def page_one():
     cpu = subprocess.check_output(cmd, shell=True)
     # Write two lines of text.
     draw.rectangle((0, 0, width, height), outline=0, fill=0)
-    draw.text((x, top), call_net(), font=en_font, fill=255)
-    draw.text((x, top + 12), str(now), font=en_font, fill=255)
-    draw.text((x, top + 24), "Ip: " + str(ip.decode('utf8').strip()).strip('b'), font=en_font, fill=255)
+    draw.text((x, top), str(now), font=en_font, fill=255)
+    draw.text((x, top + 12), "IP: " + str(ip.decode('utf8').strip()).strip('b'), font=en_font, fill=255)
+    draw.text((x, top + 24), call_net(), font=en_font, fill=255)
     # Display image.
     disp.image(image)
     disp.display()
@@ -196,9 +197,12 @@ def page_two():
     time.sleep(1)
 
 
+lock = True
 while True:
     fan()
-    if int(time.time()) % 2 == 0:
+    if lock:
         page_one()
+        lock = False
     else:
         page_two()
+        lock = True
