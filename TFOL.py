@@ -162,8 +162,6 @@ def page_one():
     cmd = "hostname -I | cut -d\' \' -f1"
     ip = subprocess.check_output(cmd, shell=True)
     now = time.strftime("%Y-%m-%d %H:%M", time.localtime())
-    cmd = "top -bn1 | grep load | awk '{printf (\"CPU:%.2f\", $(NF-2))}'"
-    cpu = subprocess.check_output(cmd, shell=True)
     # Write two lines of text.
     draw.rectangle((0, 0, width, height), outline=0, fill=0)
     draw.text((x, top), str(now), font=en_font, fill=255)
@@ -177,7 +175,8 @@ def page_one():
 
 def page_two():
     draw.rectangle((0, 0, width, height), outline=0, fill=0)
-    cmd = "top -bn1 | grep load | awk '{printf (\"CPU:%.2f\", $(NF-2))}'"
+    # cmd = "top -bn1 | grep load | awk '{printf (\"CPU:%.2f\", $(NF-2))}'"
+    cmd = "sh /root/tfoled/cpu_usage.sh"
     cpu = subprocess.check_output(cmd, shell=True)
     cmd = "cat /sys/class/thermal/thermal_zone0/temp"
     tmp_core = int(subprocess.check_output(cmd, shell=True))
@@ -186,7 +185,7 @@ def page_two():
     cmd = "free -m | awk 'NR==2{printf \"Mem: %.1f/%.1fG (%.1f%%)\", $3/1000,$2/1000,$3*100/$2 }'"
     # cmd = "free -m | awk 'NR==2{printf (\"Mem:%s/%sM\", $3,$2) }'"
     mem = subprocess.check_output(cmd, shell=True)
-    draw.text((x, top), str(cpu.decode('utf8').strip()).strip('b') + " CT:" + '{:.2f}C'.format(tmp_core / 1000),
+    draw.text((x, top), str(cpu.decode('utf8').strip()).strip('b') + " CT:" + '{:.2f}°'.format(tmp_core / 1000),
               font=en_font,
               fill=255)
     draw.text((x, top + 12), str(mem.decode('utf8').strip()).strip('b'), font=en_font, fill=255)  # "T:" +
